@@ -1,0 +1,4 @@
+$ curl -v -x http://127.0.0.1:8080 http://127.0.0.1:18080/hello   # NOTE: no --noproxy this time
+* Uses proxy env variable no_proxy == 'localhost,127.0.0.1,::1,...' (the lab machine's list, shortened)
+* Connected to 127.0.0.1 (127.0.0.1) port 18080
+> GET /hello HTTP/1.1

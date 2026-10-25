@@ -1,0 +1,11 @@
+$ ls ~/.mitmproxy/
+mitmproxy-ca-cert.cer
+mitmproxy-ca-cert.p12
+mitmproxy-ca-cert.pem
+mitmproxy-ca.p12
+mitmproxy-ca.pem
+mitmproxy-dhparam.pem
+$ openssl x509 -in ~/.mitmproxy/mitmproxy-ca-cert.pem -noout -subject -issuer -fingerprint -sha256
+subject=CN = mitmproxy, O = mitmproxy
+issuer=CN = mitmproxy, O = mitmproxy
+sha256 Fingerprint=0F:E9:27:B1:89:0E:05:8B:B9:77:13:AB:68:7C:83:5F:8C:37:FF:CC:F6:4B:86:0D:CA:AF:69:83:B7:55:A0:AB

@@ -1,0 +1,72 @@
+$ python3 echo_server.py 18080 &
+echo-server listening on 127.0.0.1:18080
+
+$ mitmdump -p 8080 -w flows/lab-http.mitm &
+
+$ curl -s --noproxy "" -x http://127.0.0.1:8080 http://127.0.0.1:18080/hello
+served-by: plain-echo-server
+method: GET
+path: /hello
+headers:
+  Host: 127.0.0.1:18080
+  User-Agent: curl/8.5.0
+  Accept: */*
+  Proxy-Connection: Keep-Alive
+body:
+
+$ curl -s --noproxy "" -x http://127.0.0.1:8080 "http://127.0.0.1:18080/search?q=teapot&page=2"
+served-by: plain-echo-server
+method: GET
+path: /search?q=teapot&page=2
+headers:
+  Host: 127.0.0.1:18080
+  User-Agent: curl/8.5.0
+  Accept: */*
+  Proxy-Connection: Keep-Alive
+body:
+
+$ curl -s --noproxy "" -x http://127.0.0.1:8080 -X POST -d "name=fern&soil=moist" http://127.0.0.1:18080/plants
+served-by: plain-echo-server
+method: POST
+path: /plants
+headers:
+  Host: 127.0.0.1:18080
+  User-Agent: curl/8.5.0
+  Accept: */*
+  Proxy-Connection: Keep-Alive
+  Content-Length: 20
+  Content-Type: application/x-www-form-urlencoded
+body:
+name=fern&soil=moist
+$ curl -s --noproxy "" -o /dev/null -w "%{http_code}\n" -x http://127.0.0.1:8080 http://127.0.0.1:18080/missing
+404
+$ cat mitmdump.log   # what mitmdump itself recorded, same run
+[02:23:11.021] HTTP(S) proxy listening at *:8080.
+[02:23:14.341][127.0.0.1:59850] client connect
+[02:23:14.354][127.0.0.1:59850] server connect 127.0.0.1:18080
+127.0.0.1:59850: GET http://127.0.0.1:18080/hello
+              << 200 OK 164b
+[02:23:14.370][127.0.0.1:59850] client disconnect
+[02:23:14.374][127.0.0.1:59850] server disconnect 127.0.0.1:18080
+[02:23:14.388][127.0.0.1:59866] client connect
+[02:23:14.393][127.0.0.1:59866] server connect 127.0.0.1:18080
+127.0.0.1:59866: GET http://127.0.0.1:18080/search?q=teapot&page=2
+              << 200 OK 181b
+[02:23:14.397][127.0.0.1:59866] client disconnect
+[02:23:14.398][127.0.0.1:59866] server disconnect 127.0.0.1:18080
+[02:23:14.405][127.0.0.1:59878] client connect
+[02:23:14.409][127.0.0.1:59878] server connect 127.0.0.1:18080
+127.0.0.1:59878: POST http://127.0.0.1:18080/plants
+              << 200 OK 257b
+[02:23:14.412][127.0.0.1:59878] client disconnect
+[02:23:14.413][127.0.0.1:59878] server disconnect 127.0.0.1:18080
+[02:23:14.422][127.0.0.1:59888] client connect
+[02:23:14.425][127.0.0.1:59888] server connect 127.0.0.1:18080
+127.0.0.1:59888: GET http://127.0.0.1:18080/missing
+              << 404 Not Found 166b
+[02:23:14.428][127.0.0.1:59888] client disconnect
+[02:23:14.428][127.0.0.1:59888] server disconnect 127.0.0.1:18080
+
+$ ls -l flows/
+total 12
+-rw-rw---- 1 root root 8388 Oct 25 02:23 lab-http.mitm

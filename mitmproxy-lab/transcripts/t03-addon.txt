@@ -1,0 +1,38 @@
+$ mitmdump -p 8080 &            # plain proxy, no addon
+
+--- BEFORE: through the proxy, no addon ---
+$ curl -s --noproxy "" -x http://127.0.0.1:8080 http://127.0.0.1:18080/hello
+served-by: plain-echo-server
+method: GET
+path: /hello
+headers:
+  Host: 127.0.0.1:18080
+  User-Agent: curl/8.5.0
+  Accept: */*
+  Proxy-Connection: Keep-Alive
+body:
+
+
+$ mitmdump -p 8080 -s labnotes.py -w flows/lab-addon.mitm &
+
+--- AFTER: same request, mitmdump now runs -s labnotes.py ---
+$ curl -s --noproxy "" -D - -x http://127.0.0.1:8080 http://127.0.0.1:18080/hello
+HTTP/1.1 200 OK
+Server: BaseHTTP/0.6 Python/3.12.3
+Date: Sun, 25 Oct 2026 02:24:59 GMT
+Content-Type: text/plain; charset=utf-8
+Content-Length: 230
+X-Lab-Note: answered-through-the-lab-addon
+
+served-by: plain-echo-server
+method: GET
+path: /hello
+headers:
+  Host: 127.0.0.1:18080
+  User-Agent: curl/8.5.0
+  Accept: */*
+  Proxy-Connection: Keep-Alive
+  X-Lab-Note: added-by-the-lab-addon
+body:
+
+[annotated by the lab addon]

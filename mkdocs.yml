@@ -1,0 +1,27 @@
+site_name: mitmproxy for Mere Mortals
+site_description: A proxy that shows you your own web traffic. Capturing HTTP and HTTPS on machines you own, reading flows line by line, filtering them, and changing them with small Python addons, with the ethics and the limits stated plainly.
+site_url: https://paulsullivan33-dev.github.io/mitmproxy-for-mere-mortals/
+
+# Guides live at the repo root (nice for GitHub browsing).
+# The deploy workflow copies them into docs/ before building.
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - What mitmproxy Is: what-mitmproxy-is.md
+  - The Moving Parts: the-moving-parts.md
+  - Installing mitmproxy: installing-mitmproxy.md
+  - Your First Capture: your-first-capture.md
+  - Reading Flows: reading-flows.md
+  - Filters: filters.md
+  - The Console and the Web UI: console-and-web-ui.md
+  - HTTPS and the Certificate Authority: https-and-the-ca.md
+  - Addons — Writing Your Own: addons.md
+  - Replay and Resending: replay-and-resending.md
+  - Recipes: recipes.md
+  - The Neighbours: the-neighbours.md
+  - Limits: limits.md
+  - Troubleshooting: troubleshooting.md
+  - Glossary: glossary.md
+  - Writing Criteria: criteria.md

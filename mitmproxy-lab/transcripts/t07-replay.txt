@@ -1,0 +1,19 @@
+$ mitmdump -C flows/lab-http.mitm   # client replay: send the recorded requests again
+[02:29:06.586] HTTP(S) proxy listening at *:8080.
+[02:29:06.682] [replay] server connect 127.0.0.1:18080
+[replay]: GET http://127.0.0.1:18080/hello
+              << 200 OK 164b
+[02:29:06.690] [replay] server disconnect 127.0.0.1:18080
+[02:29:06.696] [replay] server connect 127.0.0.1:18080
+[replay]: GET http://127.0.0.1:18080/search?q=teapot&page=2
+              << 200 OK 181b
+[02:29:06.699] [replay] server disconnect 127.0.0.1:18080
+[02:29:06.703] [replay] server connect 127.0.0.1:18080
+[replay]: POST http://127.0.0.1:18080/plants
+              << 200 OK 257b
+[02:29:06.705] [replay] server disconnect 127.0.0.1:18080
+[02:29:06.711] [replay] server connect 127.0.0.1:18080
+[replay]: GET http://127.0.0.1:18080/missing
+              << 404 Not Found 166b
+[02:29:06.716] [replay] server disconnect 127.0.0.1:18080
+(the four recorded requests went out again and were answered exactly as before)

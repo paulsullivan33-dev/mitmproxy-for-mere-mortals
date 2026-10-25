@@ -1,0 +1,10 @@
+$ mitmweb -p 8080 --web-port 8081 --no-web-open-browser &
+(its startup message carries a one-time token in the address)
+$ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8081/        # no token yet
+403
+$ curl -s -c cookies.txt -o /dev/null -w "%{http_code}\n" "http://127.0.0.1:8081/?token=<token from startup>"
+200
+$ curl -s -b cookies.txt http://127.0.0.1:8081/ | grep -o "<title>[^<]*</title>"
+<title>mitmproxy</title>
+$ curl -s -b cookies.txt http://127.0.0.1:8081/flows   # the flow the web UI is showing
+[{"id": "52ed1a5f-6da0-48be-811f-d6133f961757", "intercepted": false, "is_replay": null, "type": "http", "modified": false, "marked": "", "comment": "", "timestamp_created": 1792895284.8141541, "client_conn": {"id": "2f7083d8-c7ee-4ede-aa9c-353c71e14e90", "peername": ["127.0.0.1", 43506], "sockname": ["127.0.0.1", 8080], "tls_established": false, "cert": null, "sni": null, "cipher": null, "alpn": 

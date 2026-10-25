@@ -1,0 +1,105 @@
+The lab — one real install, one machine, nobody else's traffic
+====================================================================
+
+The lab is mitmproxy as pip ships it,
+installed into a fresh virtual environment
+on the build machine (an Ubuntu 24.04
+sandbox, 2 CPUs, 7.7 GB RAM):
+
+  * mitmproxy 12.3.0 on Python 3.12.3
+    (pip, into a venv), all three faces:
+    mitmproxy, mitmdump, mitmweb.
+  * A throwaway echo server written for
+    the guide (mitmproxy-lab/server/):
+    answers every request with a report
+    of what it received. Plain HTTP on
+    127.0.0.1:18080; HTTPS on
+    127.0.0.1:18443 behind a self-signed
+    certificate the lab made with openssl
+    (CN=localhost, SAN localhost +
+    127.0.0.1, 30 days).
+  * Every capture is between the lab's
+    own programs, on loopback addresses,
+    on that one machine. The one "secret"
+    in the HTTPS chapter ("the eagle
+    flies at dawn") was invented for the
+    occasion and sent by the lab to
+    itself.
+
+What the lab ran, in
+mitmproxy-lab/transcripts/:
+
+  * t00 versions of both mitmproxy and
+    mitmdump (12.3.0).
+  * t01 four HTTP requests through
+    mitmdump -w (GET, search with query,
+    form POST, honest 404); flow file
+    8,388 bytes; mitmdump's own log kept.
+  * t02 the file read back (-nr), four
+    filters (~m, ~c, combined &, ~bq/~bs),
+    one flow at flow_detail=4, and a
+    filtered subset written out and read
+    back (3 of the 4 flows).
+  * t03 the addon (addons/labnotes.py):
+    the same request before and after —
+    the echo server's report shows the
+    stamped request header, curl shows
+    the stamped response header and the
+    annotated body, Content-Length
+    164 -> 230.
+  * t04 HTTPS end to end: mitmproxy
+    refuses the self-signed server
+    (502, certificate verify failed);
+    with --ssl-insecure, a client not
+    trusting the CA is refused (curl
+    exit 60); trusting it via --cacert,
+    the POST is recorded in clear text.
+  * t05 mitmweb: 403 without its token,
+    200 with it, the interface's title,
+    and /flows returning the proxied
+    flow as JSON.
+  * t06 the CA folder (~/.mitmproxy) and
+    the CA certificate's subject/issuer
+    (self-signed: subject == issuer).
+  * t07 client replay (-C): all four
+    recorded requests re-sent and
+    answered identically.
+
+The sandbox's rules, discovered by
+running into them:
+
+  * The machine exports a no_proxy list
+    covering 127.0.0.1, and curl honours
+    it even over an explicit -x. The
+    lab's first captures went *directly*
+    to the server and mitmdump saw
+    nothing (t90: curl -v shows the
+    bypass). Every proxied curl in the
+    guide therefore carries
+    --noproxy ''. This is a real-world
+    trap, not a sandbox quirk; it is
+    chapter 4's warning and chapter 14's
+    first entry.
+  * mitmdump treats bare arguments after
+    the flow file as part of the filter
+    expression. Two lab commands failed
+    as filters ("~u /plants & --set &
+    flow_detail=4", "~c 200 & -w & ...")
+    before the rule was learned: options
+    before the filter. The failures are
+    noted in commands.txt so readers do
+    not repeat them.
+
+Documented only (the lab had one
+machine and no second device): the
+mitmproxy console's interactive keys
+(its flow data is the verified part);
+pointing a phone or another computer at
+the proxy; installing the CA into an
+operating system's or browser's trust
+store (only per-command trust, curl
+--cacert, was exercised); the mitm.it
+page; reverse, transparent, WireGuard
+and local capture modes; server replay
+(-S); and certificate pinning behaviour
+on real apps.

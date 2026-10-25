@@ -1,0 +1,87 @@
+mitmproxy — the distilled commands
+====================================================================
+Placeholders: <file> is a flow file
+(session.mitm); <addon.py> is an addon
+script of yours.
+
+FIRST CONTACT (chapters 3-4)
+--------------------------------------------------------------------
+  python3 -m venv ~/mitm-venv
+  ~/mitm-venv/bin/pip install mitmproxy
+  mitmproxy --version
+  mitmdump -p 8080                 # listens; Ctrl-C stops
+  ls ~/.mitmproxy/                 # the CA, born on first run
+
+  # a client, told explicitly (curl):
+  curl --noproxy '' -x http://127.0.0.1:8080 http://HOST/path
+                                   # --noproxy '' defeats the
+                                   # no_proxy bypass (chapter 4)
+  curl -v ...                      # shows proxy decisions
+
+CAPTURING (chapter 4)
+--------------------------------------------------------------------
+  mitmdump -p 8080 -w <file>       # record everything
+  mitmdump -p 8080 -w <file> "~d api.example.com"
+                                   # record matching flows only
+  mitmdump --listen-host 127.0.0.1 -p 8080
+                                   # this machine only: safer
+
+READING AND FILTERING (chapters 5-6)
+--------------------------------------------------------------------
+  mitmdump -nr <file>
+  mitmdump --set flow_detail=4 -nr <file> "~u /plants"
+  mitmdump -nr <file> "~m POST"    # method
+  mitmdump -nr <file> "~c 404"     # status code
+  mitmdump -nr <file> "~e"         # errors
+  mitmdump -nr <file> "~bq token"  # request body contains
+  mitmdump -nr <file> "~u search & ~c 200"
+  mitmdump -nr big.mitm -w smaller.mitm "~c 200"
+                                   # filter in, write subset out
+                                   # (options before the filter:
+                                   # anything after the file name
+                                   # joins the filter expression)
+
+THE OTHER FACES (chapter 7)
+--------------------------------------------------------------------
+  mitmproxy -p 8080                # console: ? is help, q quits
+  mitmweb -p 8080 --web-port 8081 --no-web-open-browser
+                                   # open the token address it
+                                   # prints; /flows is JSON
+
+HTTPS AND THE CA (chapter 8)
+--------------------------------------------------------------------
+  ls ~/.mitmproxy/                 # mitmproxy-ca-cert.pem etc.
+  openssl x509 -in ~/.mitmproxy/mitmproxy-ca-cert.pem \
+    -noout -subject -issuer
+  # one tool, one run of trust:
+  curl --cacert ~/.mitmproxy/mitmproxy-ca-cert.pem \
+    -x http://127.0.0.1:8080 https://HOST/path
+  # a browser behind the proxy: visit mitm.it
+  mitmdump --ssl-insecure          # accept unverifiable SERVER
+                                   # certs (lab servers; a waiver,
+                                   # not a habit)
+
+ADDONS (chapter 9)
+--------------------------------------------------------------------
+  mitmdump -p 8080 -s <addon.py>
+  # the two hooks that matter:
+  #   def request(flow):  ...      before it goes out
+  #   def response(flow): ...      after the answer returns
+  # flow.request.headers["X-Note"] = "..."
+  # flow.response.text = flow.response.text + "..."
+  # flow.kill()                      drop the flow entirely
+
+REPLAY (chapter 10)
+--------------------------------------------------------------------
+  mitmdump -C <file>               # client replay: ask again
+  mitmdump -C <file> "~u /plants"  # only the matching requests
+  mitmdump -S <file>               # server replay: answer from
+                                   # the recording (a mock)
+
+HOUSEKEEPING
+--------------------------------------------------------------------
+  rm -rf ~/.mitmproxy              # retire a CA; a fresh one is
+                                   # minted next run (and every
+                                   # trust install must be redone)
+  # flow files hold secrets: keep them like the data in them,
+  # delete them when the question is answered (chapter 5)

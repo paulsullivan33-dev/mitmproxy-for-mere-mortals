@@ -1,0 +1,81 @@
+$ mitmdump -nr flows/lab-http.mitm
+127.0.0.1:59850: GET http://127.0.0.1:18080/hello
+              << 200 OK 164b
+127.0.0.1:59866: GET http://127.0.0.1:18080/search?q=teapot&page=2
+              << 200 OK 181b
+127.0.0.1:59878: POST http://127.0.0.1:18080/plants
+              << 200 OK 257b
+127.0.0.1:59888: GET http://127.0.0.1:18080/missing
+              << 404 Not Found 166b
+
+$ mitmdump -nr flows/lab-http.mitm "~m POST"
+[02:23:50.528] Only processing flows that match "~m POST"
+127.0.0.1:59878: POST http://127.0.0.1:18080/plants
+              << 200 OK 257b
+
+$ mitmdump -nr flows/lab-http.mitm "~c 404"
+[02:23:51.937] Only processing flows that match "~c 404"
+127.0.0.1:59888: GET http://127.0.0.1:18080/missing
+              << 404 Not Found 166b
+
+$ mitmdump -nr flows/lab-http.mitm "~u search & ~c 200"
+[02:23:53.239] Only processing flows that match "~u search & ~c 200"
+127.0.0.1:59866: GET http://127.0.0.1:18080/search?q=teapot&page=2
+              << 200 OK 181b
+$ mitmdump --set flow_detail=4 -nr flows/lab-http.mitm "~u /plants"
+[02:24:06.036] Only processing flows that match "~u /plants"
+127.0.0.1:59878: POST http://127.0.0.1:18080/plants
+    Host: 127.0.0.1:18080
+    User-Agent: curl/8.5.0
+    Accept: */*
+    Proxy-Connection: Keep-Alive
+    Content-Length: 20
+    Content-Type: application/x-www-form-urlencoded
+
+    name: fern
+    soil: moist
+
+ << 200 OK 257b
+    Server: BaseHTTP/0.6 Python/3.12.3
+    Date: Sun, 25 Oct 2026 02:23:14 GMT
+    Content-Type: text/plain; charset=utf-8
+    Content-Length: 257
+
+    served-by: plain-echo-server
+    method: POST
+    path: /plants
+    headers:
+      Host: 127.0.0.1:18080
+      User-Agent: curl/8.5.0
+      Accept: */*
+      Proxy-Connection: Keep-Alive
+      Content-Length: 20
+      Content-Type: application/x-www-form-urlencoded
+    body:
+    name=fern&soil=moist
+
+
+$ mitmdump -nr flows/lab-http.mitm "~bq soil"
+[02:31:34.853] Only processing flows that match "~bq soil"
+127.0.0.1:59878: POST http://127.0.0.1:18080/plants
+              << 200 OK 257b
+
+$ mitmdump -nr flows/lab-http.mitm "~bs moist"
+[02:31:35.853] Only processing flows that match "~bs moist"
+127.0.0.1:59878: POST http://127.0.0.1:18080/plants
+              << 200 OK 257b
+
+$ mitmdump -nr flows/lab-http.mitm -w flows/lab-200-only.mitm "~c 200"
+127.0.0.1:59850: GET http://127.0.0.1:18080/hello
+              << 200 OK 164b
+127.0.0.1:59866: GET http://127.0.0.1:18080/search?q=teapot&page=2
+              << 200 OK 181b
+127.0.0.1:59878: POST http://127.0.0.1:18080/plants
+              << 200 OK 257b
+$ mitmdump -nr flows/lab-200-only.mitm
+127.0.0.1:59850: GET http://127.0.0.1:18080/hello
+              << 200 OK 164b
+127.0.0.1:59866: GET http://127.0.0.1:18080/search?q=teapot&page=2
+              << 200 OK 181b
+127.0.0.1:59878: POST http://127.0.0.1:18080/plants
+              << 200 OK 257b

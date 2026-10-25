@@ -1,0 +1,54 @@
+$ openssl req -x509 -newkey rsa:2048 -nodes -days 30 -subj "/CN=localhost" -addext "subjectAltName=DNS:localhost,IP:127.0.0.1" -keyout tls-key.pem -out tls-cert.pem
+(a self-signed certificate for the lab server, made in the lab)
+$ python3 echo_server.py 18443 tls-cert.pem tls-key.pem &
+echo-server listening on 127.0.0.1:18443
+
+--- mitmproxy meets the self-signed server certificate ---
+$ curl -s --noproxy "" --cacert ~/.mitmproxy/mitmproxy-ca-cert.pem -x http://127.0.0.1:8080 https://localhost:18443/diary (mitmproxy still verifying the server certificate)
+<html>
+<head>
+    <title>502 Bad Gateway</title>
+</head>
+<body>
+    <h1>502 Bad Gateway</h1>
+    <p>Certificate verify failed: self-signed certificate</p>
+</body>
+</html>curl exit: 0
+mitmdump said: [02:25:51.717][127.0.0.1:56780] Server TLS handshake failed. Certificate verify failed: self-signed certificate
+mitmdump said: [02:25:51.724][127.0.0.1:56780] Unable to establish TLS connection with server (Certificate verify failed: self-signed certificate). Trying to establish TLS with client anyway. If you plan to redirect requests away from this server, consider setting `connection_strategy` to `lazy` to suppress early connections.
+
+--- the client refuses mitmproxy until it trusts the CA ---
+$ curl --noproxy "" -x http://127.0.0.1:8080 https://localhost:18443/diary
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+
+--- with the CA trusted, the same trip succeeds, and is recorded in clear ---
+$ curl -s --noproxy "" -x http://127.0.0.1:8080 https://localhost:18443/diary    # NOT trusting the mitmproxy CA
+curl exit: 60
+
+$ curl -s --noproxy "" --cacert ~/.mitmproxy/mitmproxy-ca-cert.pem -x http://127.0.0.1:8080 -X POST -d "note=the-eagle-flies-at-dawn" https://localhost:18443/diary
+served-by: plain-echo-server
+method: POST
+path: /diary
+headers:
+  Host: localhost:18443
+  User-Agent: curl/8.5.0
+  Accept: */*
+  Content-Length: 28
+  Content-Type: application/x-www-form-urlencoded
+body:
+note=the-eagle-flies-at-dawn
+$ mitmdump --set flow_detail=4 -nr flows/lab-https.mitm
+127.0.0.1:57454: POST https://localhost:18443/diary
+    Host: localhost:18443
+    User-Agent: curl/8.5.0
+    Accept: */*
+    Content-Length: 28
+    Content-Type: application/x-www-form-urlencoded
+
+    note: the-eagle-flies-at-dawn
+
+ << 200 OK 233b
+    Server: BaseHTTP/0.6 Python/3.12.3
+    Date: Sun, 25 Oct 2026 02:26:17 GMT
+    Content-Type: text/plain; charset=utf-8
+    Content-Length: 233

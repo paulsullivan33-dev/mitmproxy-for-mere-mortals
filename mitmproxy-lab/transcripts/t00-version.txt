@@ -1,0 +1,10 @@
+$ mitmproxy --version
+Mitmproxy: 12.3.0
+Python:    3.12.3
+OpenSSL:   OpenSSL 4.0.3 29 Sep 2026
+Platform:  Linux-7.0.0-39-generic-x86_64-with-glibc2.39
+$ mitmdump --version
+Mitmproxy: 12.3.0
+Python:    3.12.3
+OpenSSL:   OpenSSL 4.0.3 29 Sep 2026
+Platform:  Linux-7.0.0-39-generic-x86_64-with-glibc2.39
