@@ -200,3 +200,19 @@ eye. The lab's transcripts live in
 server is `mitmproxy-lab/server/` and its
 addon `mitmproxy-lab/addons/`; its notes
 are `examples/lab-notes.txt`.
+
+---
+
+## Part of the series
+
+This guide is one of the [For Mere Mortals](https://paulsullivan33-dev.github.io/mere-mortals/) guides: plain-language guides to the tools programmers and makers use.
+
+Related guides:
+
+- [Wireshark for Mere Mortals](https://paulsullivan33-dev.github.io/wireshark-for-mere-mortals/)
+- [curl for Mere Mortals](https://paulsullivan33-dev.github.io/curl-for-mere-mortals/)
+- [APIs for Mere Mortals](https://paulsullivan33-dev.github.io/api-for-mere-mortals/)
+
+## License
+
+The writing in this guide is licensed under [CC BY 4.0](https://github.com/paulsullivan33-dev/mitmproxy-for-mere-mortals/blob/main/LICENSE). Code examples and lab scripts are licensed under the [MIT License](https://github.com/paulsullivan33-dev/mitmproxy-for-mere-mortals/blob/main/LICENSE-CODE).
